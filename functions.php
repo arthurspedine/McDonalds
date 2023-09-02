@@ -167,8 +167,8 @@ function requestList(){
     }
 }
 
-function attRequestList($archive, $search, $key){
-    $lines = file($archive);
+function attRequestList($file, $search, $key){
+    $lines = file($file);
 
     foreach ($lines as &$line){
         $rows = str_getcsv($line);
@@ -177,7 +177,7 @@ function attRequestList($archive, $search, $key){
             $line = '"' . $rows[0] . '",' . $rows[1] . ', ' . $rows[2] . "\n";
         }
     }
-    file_put_contents($archive, implode('', $lines));
+    file_put_contents($file, implode('', $lines));
 }
 
 function soma(){
