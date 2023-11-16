@@ -78,7 +78,7 @@ function format($value){
     if (is_numeric($value)){
         return number_format($value, 2, ".", " ");
     } else {
-        return realFloat($value);
+        return readFloat($value);
     }
 }
 function startRequest(){
@@ -152,49 +152,103 @@ function menuMessage(){
 
 function requestList(){
     print_r("|--------------|  LISTA DOS PEDIDOS  |--------------|". PHP_EOL);
-    print_r("|   Produto    |      Valor(es)      |  Quantidade  |". PHP_EOL);
+    print_r("|  Quantidade  |      Produto(s)     |   Valor(es)  |". PHP_EOL);
 
     $fileRequests = __DIR__.'/database/request-list.csv';
     $requests = readFileToArray($fileRequests);
 
     foreach($requests as $row){
 
-        $type = str_pad($row['code'], 10, ' ', STR_PAD_RIGHT);
-        $value = str_pad($row['product'], 14, ' ', STR_PAD_RIGHT);
-        $qnt = str_pad($row['value'], 8, ' ', STR_PAD_RIGHT);
+        $qnt = str_pad($row['code'], 6, ' ', STR_PAD_RIGHT);
+        $type = str_pad($row['product'], 10, ' ', STR_PAD_RIGHT);
+        $value = str_pad($row['value'], 9, ' ', STR_PAD_RIGHT);
 
-        print_r('|  '.$type.'  |       '.$value.'|     '.$qnt.' | '.PHP_EOL);
+        print_r('|      '.$qnt.'  |     '.$type.'      |    '.$value.' | '.PHP_EOL);
     }
 }
 
 function attRequestList($file, $search, $key){
-    $lines = file($file);
+    $lines = file($file); 
 
     foreach ($lines as &$line){
         $rows = str_getcsv($line);
-        if ($rows[0] === $search){
-            $rows[2] = $key;
-            $line = '"' . $rows[0] . '",' . $rows[1] . ', ' . $rows[2] . "\n";
+        if ($rows[1] === $search){
+            $rows[0] = $key;
+            $line = $rows[0] . ', "' . $rows[1] . '",' . $rows[2] . "\n";
         }
     }
     file_put_contents($file, implode('', $lines));
 }
 
-function soma(){
+function add(){
     $filePath = __DIR__.'/database/request-list.csv';
     $lines = readFileToArray($filePath);
 
     $total = 0.0;
 
     foreach($lines as $row){
-        $total = $total + ($row['product'] * $row['value']);
+        $total = $total + ($row['code'] * $row['value']);
     }
     $totalForm = number_format($total,2, '.', '');
-    $totalFormated = str_pad($totalForm, 8, ' ', STR_PAD_RIGHT);
+    $totalFormated = str_pad($totalForm, 9, ' ', STR_PAD_RIGHT);
 
-    print_r("|---------------------------------------------------|".PHP_EOL);
-    print_r("|   Total: |    R$".$totalFormated."   |                      |  ".PHP_EOL);
-    print_r("|---------------------------------------------------|".PHP_EOL);
-
+    if (strlen($totalForm) < 5){
+        print_r("|---------------------------------------------------|".PHP_EOL);
+        print_r("|   Total:     |        ".$totalFormated."    |              |  ".PHP_EOL);
+        print_r("|---------------------------------------------------|".PHP_EOL);
+    } else {
+        print_r("|---------------------------------------------------|".PHP_EOL);
+        print_r("|   Total:     |       ".$totalFormated."     |              |  ".PHP_EOL);
+        print_r("|---------------------------------------------------|".PHP_EOL);
+    }
 }
+
+// ! DELETE PART
+
+function exist($key, $code){
+    try {
+        $handle = fopen(__DIR__.'/database/request-list.csv', 'r');
+        if ($handle !== false){
+            while(($row = fgetcsv($handle)) !== false){
+                if (!empty($row) && $row[$key] == $code){
+                    fclose($handle);
+                    return true;
+                }
+            }
+            fclose($handle);
+        }
+        return false;
+    } catch (Exception $e) {
+        echo "Erro!";
+        return false;
+    } 
+}
+
+
+function rLine($key){
+    $linhas = file(__DIR__.'/database/request-list.csv');
+    
+    // Verifica se a chave existe
+    $keyExists = false;
+    foreach ($linhas as $linha) {
+        $dados = str_getcsv($linha);
+        if ($dados[1] === $key) {
+            $keyExists = true;
+            break;
+        }
+    }
+
+    $handle = fopen(__DIR__.'/database/request-list.csv', "w");
+
+    foreach ($linhas as $linha) {
+        $dados = str_getcsv($linha);
+        if ($dados[1] !== $key) {
+            fwrite($handle, $linha);
+        }
+    }
+    print_r("Pedido removido com sucesso!". PHP_EOL);
+    fclose($handle);
+    return true;
+}
+
 ?>

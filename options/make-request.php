@@ -12,8 +12,8 @@ if (ifExists(0, $key) || ifExists(1, $key)){
         }
     }
     foreach ($fL as $linha) { // * VERIFICAR SE JA EXISTE O PEDIDO!
-        if ($linha['code'] == $a){
-        $exit = true;
+        if ($linha['product'] == $a){
+            $exit = true;
             while ($exit == true) { 
                 $key = NULL;
                 print_r("Produto já está na lista de pedidos!". PHP_EOL);
@@ -50,7 +50,7 @@ if (ifExists(0, $key) || ifExists(1, $key)){
                 if ($row['code'] == $key){
                     $type = $row['product'];
                     $value = $row['value'];
-                    $line = '"'.$type.'",'.$value.' , '.$qnt.PHP_EOL;
+                    $line = $qnt.', "'.$type.'",'.$value.PHP_EOL;
                     file_put_contents($fileList, $line, FILE_APPEND);
                     print_r($line);
                     $key = NULL;

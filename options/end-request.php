@@ -2,7 +2,7 @@
 $exit = true;
 while($exit = true){
     requestList();
-    soma();
+    add();
     print_r("Finalizar compra? s/n : ");
     $r = stream_get_line(STDIN, 1024, PHP_EOL);
     switch ($r){
